@@ -13,6 +13,7 @@ const publicEntries = [
   "404.html",
   "company",
   "en",
+  "fonts.css",
   "index.html",
   "news",
   "script.js",
@@ -167,8 +168,14 @@ async function applyBasePath(directory) {
       await writeFile(target, html.replaceAll(/\b(href|src)="\/(?!\/)/g, `$1="${basePath}/`));
     } else if (entry.name.endsWith(".css")) {
       const css = await readFile(target, "utf8");
-      // 表示制御に使っている [href="/company/"] のような属性セレクタもURLに追随させる。
-      await writeFile(target, css.replaceAll(/\[href="\/(?!\/)/g, `[href="${basePath}/`));
+      await writeFile(
+        target,
+        css
+          // 表示制御に使っている [href="/company/"] のような属性セレクタもURLに追随させる。
+          .replaceAll(/\[href="\/(?!\/)/g, `[href="${basePath}/`)
+          // 自サイトから配信するフォント（url(/fonts/...)）も同様にずらす。
+          .replaceAll(/url\(\/(?!\/)/g, `url(${basePath}/`)
+      );
     }
   }
 }
