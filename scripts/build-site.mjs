@@ -95,6 +95,33 @@ async function stripUnpublishedMembers(directory) {
 
 await stripUnpublishedMembers(outputRoot);
 
+// アクセス解析。Cookieを使わないCloudflare Web Analyticsを全ページに入れる。
+// 共通パーツを差し込む仕組みがないため、ここで一括して挿入する。1ページでも
+// 抜けるとそのページへの直接流入が計測から漏れるので、head の無いHTMLは失敗させる。
+const ANALYTICS_TAG =
+  '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" ' +
+  'data-cf-beacon=\'{"token": "aac8da8284204ddb9a07cde023fc1166"}\'></script>';
+
+async function injectAnalytics(directory) {
+  let injected = 0;
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      injected += await injectAnalytics(target);
+    } else if (entry.name.endsWith(".html")) {
+      const html = await readFile(target, "utf8");
+      if (!html.includes("</head>")) {
+        throw new Error(`Unable to inject analytics: ${target} has no </head>`);
+      }
+      await writeFile(target, html.replace("</head>", `${ANALYTICS_TAG}</head>`));
+      injected += 1;
+    }
+  }
+  return injected;
+}
+
+const analyticsPages = await injectAnalytics(outputRoot);
+
 // Images, icons and GitHub Pages metadata are copied without transformation.
 for (const entry of await readdir(publicRoot)) {
   await cp(path.join(publicRoot, entry), path.join(outputRoot, entry), {
@@ -153,4 +180,7 @@ if (basePath) {
   console.log(`Rewrote root-absolute references to ${basePath}/ and removed CNAME`);
 }
 
-console.log(`Built ${publicEntries.length} source entries and public assets in ${outputRoot}`);
+console.log(
+  `Built ${publicEntries.length} source entries and public assets in ${outputRoot}` +
+    ` (analytics injected into ${analyticsPages} pages)`
+);
