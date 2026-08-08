@@ -6,12 +6,14 @@ TxPPIEのコーポレートサイトです。編集用ソース、静的アセ�
 
 ```text
 src/      HTML・CSS・JavaScript・ニュースデータなどの編集元
-public/   画像・アイコン・CNAMEなど無加工で配信するファイル
+public/   画像・アイコン・フォント・CNAMEなど無加工で配信するファイル
 scripts/  ビルドと検査スクリプト
-docs/     自動生成されるGitHub Pages公開物
+docs/     ビルド出力（Git管理外。公開のたびに作り直されます）
 ```
 
 外部依存パッケージはありません。ビルドはNode.jsの標準機能だけで動きます。
+
+`docs/` はGitで追跡していません。公開時はワークフローが `npm run build` で作り直したものを配信するため、リポジトリに置いておく必要がないからです。**クローン直後は `docs/` が存在しないので、`npm run check` や `npm run preview` の前に `npm run build` を実行してください。**
 
 ## ローカル確認
 
@@ -40,6 +42,12 @@ npm run preview
 `main` ブランチへの push で `.github/workflows/deploy.yml` が起動し、ビルドした `docs/` を公開します。GitHubの Settings → Pages の Source は「GitHub Actions」を選択してください。カスタムドメインは `public/CNAME` で管理します。
 
 独自ドメイン直下ではなくサブパス配下（`https://<user>.github.io/<repo>/` など）へ公開する場合は、参照パスが自動で調整されます。公開先のURLはワークフローが判定するため、設定は不要です。
+
+## アクセス解析
+
+Cloudflare Web Analytics を全ページに入れています。タグはビルド時に自動挿入されるため、HTMLへ手で貼る必要はありません。実装、収集される情報、サイトポリシーとの対応、CloudFront移行時の注意は [ANALYTICS.md](ANALYTICS.md) にまとめています。
+
+**外部サービス（埋め込み動画、地図、チャット等）を新たに追加する場合は、サイトポリシーへの追記が必要かを確認してください。**
 
 ## 更新時の確認箇所
 

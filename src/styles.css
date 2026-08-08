@@ -546,7 +546,7 @@ a.policy-switch:hover { color: var(--green); }
 .policy-content ol { display: grid; gap: 0; padding: 0; margin: 30px 0 0; border-top: 1px solid var(--line); list-style: none; counter-reset: policy-list; }
 .policy-content li { position: relative; padding: 15px 15px 15px 55px; border-bottom: 1px solid var(--line); color: var(--ink-soft); font-size: 14px; line-height: 1.8; counter-increment: policy-list; }
 .policy-content li::before { position: absolute; left: 10px; color: var(--green); content: counter(policy-list, decimal-leading-zero); font-size: 11px; font-weight: 700; }
-.policy-end { display: flex; align-items: center; justify-content: flex-end; padding-top: 30px; color: #5f726e; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.policy-end { display: flex; align-items: center; justify-content: space-between; padding-top: 30px; color: #5f726e; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
 .policy-end a { color: var(--ink); }
 .footer-meta nav a.is-current { color: var(--green); font-weight: 700; }
 .legal-page .footer-contact, .legal-page .footer-marquee, .legal-page .footer-main { display: none; }
