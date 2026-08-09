@@ -99,9 +99,12 @@ await stripUnpublishedMembers(outputRoot);
 // アクセス解析。Cookieを使わないCloudflare Web Analyticsを全ページに入れる。
 // 共通パーツを差し込む仕組みがないため、ここで一括して挿入する。1ページでも
 // 抜けるとそのページへの直接流入が計測から漏れるので、head の無いHTMLは失敗させる。
+// Cloudflareのダッシュボードが出すスニペットをそのまま使う。差し替える場合も原文のまま貼る。
 const ANALYTICS_TAG =
-  '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" ' +
-  'data-cf-beacon=\'{"token": "aac8da8284204ddb9a07cde023fc1166"}\'></script>';
+  `<!-- Cloudflare Web Analytics -->` +
+  `<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' ` +
+  `data-cf-beacon='{"token": "3c1ad1e05d054c37aed076b2865554ec"}'></script>` +
+  `<!-- End Cloudflare Web Analytics -->`;
 
 async function injectAnalytics(directory) {
   let injected = 0;

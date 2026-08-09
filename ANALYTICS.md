@@ -8,14 +8,14 @@
 | 項目 | 内容 |
 |---|---|
 | サービス | Cloudflare Web Analytics（Cloudflare, Inc.） |
-| サイトトークン | `aac8da8284204ddb9a07cde023fc1166` |
+| サイトトークン | `3c1ad1e05d054c37aed076b2865554ec` |
 | 読み込み元 | `https://static.cloudflareinsights.com/beacon.min.js` |
 | 挿入対象 | 全HTMLページ（現在25ページ） |
 | 挿入位置 | 各ページの `</head>` 直前 |
 | Cookie | 使用しない |
 
-トークンは現行サイト（`txp.co.jp`）と同一のものを引き継いでいます。計測を途切れさせない
-ためで、新規に発行し直してはいません。
+トークンはリニューアル版のために新規発行したもので、現行サイト（`txp.co.jp`、旧React版、
+トークン `aac8da82…`）とは別です。**両者のアクセスは別々に集計されます。**
 
 ## なぜこの構成なのか
 
@@ -42,9 +42,17 @@ Cookie同意バナーを設けずに計測できます。
 
 ```js
 const ANALYTICS_TAG =
-  '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" ' +
-  'data-cf-beacon=\'{"token": "aac8da8284204ddb9a07cde023fc1166"}\'></script>';
+  `<!-- Cloudflare Web Analytics -->` +
+  `<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' ` +
+  `data-cf-beacon='{"token": "3c1ad1e05d054c37aed076b2865554ec"}'></script>` +
+  `<!-- End Cloudflare Web Analytics -->`;
 ```
+
+Cloudflareのダッシュボードが表示するスニペットを、コメントも含めて原文のまま使っています。
+差し替えるときも加工せずそのまま貼ってください。
+
+`type='module'` のスクリプトはCORSモードで取得されますが、`static.cloudflareinsights.com`
+は `access-control-allow-origin: *` を返すため問題ありません。
 
 `docs/` 配下のHTMLを走査し、`</head>` の直前へ挿入します。**`</head>` を持たないHTMLが
 あった場合はビルドを失敗させます。**計測漏れが静かに発生するより、ビルドを止めたほうが
@@ -88,19 +96,19 @@ Cloudflare Web Analytics は、閲覧数、参照元、利用端末やブラウ�
 
 ## 運用上の注意
 
+### 現行サイトとは別に集計される
+
+現行サイト（`txp.co.jp`、旧React版）はトークン `aac8da82…` を使い続けています。本リポジトリ
+のサイトは別トークンなので、**両者のアクセスは混ざりません。**Cloudflareのダッシュボードでは
+別のサイトとして表示されます。
+
+本番切り替え後、旧サイトのトークンをどう扱うか（残す／削除する）は別途判断が必要です。
+
 ### 検証サイトのアクセスも計測される
 
 `https://txppie-inc.github.io/corporate-site/` へのアクセスも、本番と同じトークンで
-記録されます。Cloudflareのダッシュボードではホスト名で区別できるため、本番（`txp.co.jp`）
-と切り分けて確認できます。
-
-完全に分けたい場合は、検証用に別トークンを発行し、`BASE_PATH` の有無で切り替える実装に
-変更する必要があります。
-
-### 現行サイトと数値が混ざる
-
-現行サイト（`txp.co.jp`、旧React版）も同じトークンを使っています。切り替えが完了するまで、
-両サイトのアクセスが同一のダッシュボードに集計されます。
+記録されます。Cloudflareのダッシュボードではホスト名で区別できるため、本番ドメインへの
+切り替え後も切り分けて確認できます。
 
 ### CloudFront 移行時のCSP
 
