@@ -31,6 +31,81 @@ for (const entry of publicEntries) {
   });
 }
 
+// ヘッダーとフッターは全ページ共通なので src/partials に1枚ずつ置き、ここで差し込む。
+// 各ページに実体をコピーしていた頃は、同じはずの記述が少しずつずれて
+// aria-current の抜けや英語版だけ問い合わせ欄が無いといった不具合が生まれていた。
+// ページごとに変わるのは現在地マーカーと言語切替のリンク先だけで、どちらもパスから決まる。
+const partials = {};
+for (const lang of ["ja", "en"]) {
+  for (const kind of ["header", "footer"]) {
+    partials[`${kind}.${lang}`] = (
+      await readFile(path.join(sourceRoot, "partials", `${kind}.${lang}.html`), "utf8")
+    ).trimEnd();
+  }
+}
+
+function pageContext(route) {
+  const english = route === "/en/" || route.startsWith("/en/");
+  const root = english ? "/en/" : "/";
+  const isHome = route === root;
+  const section = route.slice(root.length).split("/")[0];
+  const inNav = ["company", "service", "news"].includes(section);
+  return {
+    lang: english ? "en" : "ja",
+    root,
+    // トップページではブランドとモバイルナビ先頭がページ内アンカーになる。
+    home: isHome ? "#top" : root,
+    scrolled: !isHome,
+    // フッターの「PAGE TOP」は各ページ自身の先頭要素を指す。
+    pageTop: isHome ? "#top" : section === "site-policy" ? "#policy-top" : "#main",
+    // ヘッダーのナビにはサイトポリシーが無く、トップはページ内アンカー。
+    // フッターには両方あり、トップは絶対パスで並んでいる。指す先が違うので分けて持つ。
+    currentHeader: isHome ? "#top" : inNav ? `${root}${section}/` : null,
+    currentFooter: isHome ? root : inNav || section === "site-policy" ? `${root}${section}/` : null,
+    alt: isHome ? (english ? "/" : "/en/") : english ? `/${section}/` : `/en/${section}/`
+  };
+}
+
+function renderPartial(kind, context) {
+  const html = partials[`${kind}.${context.lang}`]
+    .replaceAll("{{ALT}}", context.alt)
+    .replaceAll("{{HOME}}", context.home)
+    .replaceAll("{{ROOT}}", context.root)
+    .replaceAll("{{PAGETOP}}", context.pageTop)
+    .replaceAll("{{SCROLLED}}", context.scrolled ? " is-scrolled" : "");
+  const current = kind === "header" ? context.currentHeader : context.currentFooter;
+  if (!current) return html;
+  // 現在地の印。ヘッダーは class を href の前、フッターは後ろに置く既存の書き方に揃える。
+  // href だけを持つリンク＝ナビ項目に限定する。ブランドロゴは aria-label を伴うため対象外。
+  return html.replaceAll(`<a href="${current}">`, () =>
+    kind === "header"
+      ? `<a class="is-current" href="${current}" aria-current="page">`
+      : `<a href="${current}" class="is-current" aria-current="page">`
+  );
+}
+
+async function applyPartials(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await applyPartials(target);
+    } else if (entry.name.endsWith(".html")) {
+      const html = await readFile(target, "utf8");
+      if (!html.includes("<!--#header-->")) continue;
+      const route = `/${path.relative(outputRoot, target).replace(/index\.html$/, "")}`;
+      const context = pageContext(route);
+      await writeFile(
+        target,
+        html
+          .replace("<!--#header-->", () => renderPartial("header", context))
+          .replace("<!--#footer-->", () => renderPartial("footer", context))
+      );
+    }
+  }
+}
+
+await applyPartials(outputRoot);
+
 // CSSの内容からバージョンを生成し、更新時に古いスタイルがブラウザへ残らないようにする。
 const stylesheet = await readFile(path.join(sourceRoot, "styles.css"));
 const stylesheetVersion = createHash("sha256").update(stylesheet).digest("hex").slice(0, 12);
