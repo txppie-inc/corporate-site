@@ -1,11 +1,3 @@
-// Optional company members: change only these booleans to publish/unpublish a card.
-const OPTIONAL_MEMBER_VISIBILITY = {};
-
-document.querySelectorAll("[data-optional-member]").forEach((card) => {
-  const visible = OPTIONAL_MEMBER_VISIBILITY[card.dataset.optionalMember];
-  card.hidden = !visible;
-});
-
 const header = document.querySelector("[data-header]");
 const menuButton = document.querySelector("[data-menu-button]");
 const mobileNav = document.querySelector("[data-mobile-nav]");

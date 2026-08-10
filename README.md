@@ -54,8 +54,8 @@ Cloudflare Web Analytics を全ページに入れています。タグはビル�
 
 ## 更新時の確認箇所
 
-- ニュースの一覧データは `src/news/news-data.json` に集約しています。記事ページは `src/news/<記事ID>/index.html` にあります。記事を追加したら `public/sitemap.xml` にも追記してください（`npm run check` が過不足を検査します）。
+- ニュースは `src/news/news-data.json` に追記するだけで一覧に載ります。**掲載先のURLを `source` に書けば、一覧からそちらへ直接送るので個別ページは作りません。**外部に掲載先が無い記事（自社発表など）だけ `source` を空にし、受け皿として `src/news/<記事ID>/index.html` と `public/sitemap.xml` への追記を行ってください。`npm run check` が、この対応関係とsitemapの過不足を検査します。
 - 英語版は `src/en/` にあります。日本語版と同じく、トップ、会社概要、VoiceAtlas、ニュース、サイトポリシーを個別ページで管理します。
-- **このリポジトリは公開されています。未発表の人事・提携などの情報をコミットしないでください。**メンバーカードは公表後に追加します。`src/script.js` 冒頭の `OPTIONAL_MEMBER_VISIBILITY` を `true` にしたカードだけが公開され、`false` のものはビルド時にHTML・画像ごと出力から除かれますが、これは配信物を守る仕組みであって、ソースの内容は誰でも読めます。
+- **このリポジトリは公開されています。未発表の人事・提携などの情報をコミットしないでください。**以前は未公開メンバーをビルド時に除去する仕組みがありましたが、ソースは誰でも読めるため配信物しか守れず、実効性がありませんでした。メンバーカードは公表後に `src/company/index.html` と `src/en/company/index.html` へ追加し、写真を `public/img/` に置いてください。
 - 会社情報・所在地・連絡先を変更する場合は、会社概要とポリシーに加えて `src/partials/footer.ja.html` と `src/partials/footer.en.html` も更新してください。フッターはこの2枚が全ページに反映されます。
 - SNS共有画像は `public/assets/og-txppie.png`（1200×630px）です。

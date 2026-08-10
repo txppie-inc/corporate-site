@@ -128,49 +128,6 @@ async function versionStylesheets(directory) {
 
 await versionStylesheets(outputRoot);
 
-// Unpublished team-member cards must never reach the production build: the
-// hidden attribute toggled by script.js at runtime is a display preference,
-// not an access control, so anything gated by OPTIONAL_MEMBER_VISIBILITY is
-// stripped from the shipped HTML (and its photo) here at build time.
-// script.js owns OPTIONAL_MEMBER_VISIBILITY (it must run in the browser as a
-// plain object literal); it is parsed from the built script.js so there is a
-// single source of truth for publish/unpublish state.
-const builtScript = await readFile(path.join(outputRoot, "script.js"), "utf8");
-const visibilityMatch = builtScript.match(/OPTIONAL_MEMBER_VISIBILITY\s*=\s*(\{[\s\S]*?\});/);
-if (!visibilityMatch) {
-  throw new Error("Unable to locate OPTIONAL_MEMBER_VISIBILITY in script.js");
-}
-const OPTIONAL_MEMBER_VISIBILITY = new Function(`return (${visibilityMatch[1]});`)();
-const unpublishedMembers = Object.entries(OPTIONAL_MEMBER_VISIBILITY)
-  .filter(([, visible]) => !visible)
-  .map(([member]) => member);
-
-async function stripUnpublishedMembers(directory) {
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    const target = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      await stripUnpublishedMembers(target);
-    } else if (entry.name.endsWith(".html")) {
-      let html = await readFile(target, "utf8");
-      let changed = false;
-      for (const member of unpublishedMembers) {
-        const articlePattern = new RegExp(
-          `<article\\b[^>]*\\bdata-optional-member="${member}"[^>]*>[\\s\\S]*?<\\/article>`,
-          "g"
-        );
-        const strippedHtml = html.replace(articlePattern, "");
-        if (strippedHtml !== html) {
-          html = strippedHtml;
-          changed = true;
-        }
-      }
-      if (changed) await writeFile(target, html);
-    }
-  }
-}
-
-await stripUnpublishedMembers(outputRoot);
-
 // アクセス解析。Cookieを使わないCloudflare Web Analyticsを全ページに入れる。
 // 共通パーツを差し込む仕組みがないため、ここで一括して挿入する。1ページでも
 // 抜けるとそのページへの直接流入が計測から漏れるので、head の無いHTMLは失敗させる。
@@ -207,22 +164,6 @@ for (const entry of await readdir(publicRoot)) {
     recursive: true
   });
 }
-
-// Photos for unpublished members must not be copied into the deployed site.
-for (const member of unpublishedMembers) {
-  await rm(path.join(outputRoot, "img", `${member}.webp`), { force: true });
-}
-
-// 非公開メンバーはHTMLからも画像からも取り除いてあるので、識別子だけを配信物へ残す理由がない。
-// 残すと「その名前の人物が未公開で控えている」ことがscript.jsから読み取れてしまう。
-// 編集用の src/script.js は全員分を保持したまま、出力には公開中のものだけを書き出す。
-const publishedVisibility = Object.fromEntries(
-  Object.entries(OPTIONAL_MEMBER_VISIBILITY).filter(([, visible]) => visible)
-);
-await writeFile(
-  path.join(outputRoot, "script.js"),
-  builtScript.replace(visibilityMatch[1], () => JSON.stringify(publishedVisibility, null, 2))
-);
 
 // Editorial source data is validated during the build but is not a public asset.
 await rm(path.join(outputRoot, "news", "news-data.json"), { force: true });

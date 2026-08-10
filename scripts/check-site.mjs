@@ -150,20 +150,24 @@ for (let index = 0; index < newsData.length; index += 1) {
 
   const detailPath = path.join(siteRoot, "news", item.slug, "index.html");
   const detailPage = htmlByFile.get(detailPath);
-  if (!detailPage) {
+  // 掲載先が外部にある記事は、一覧からそちらへ直接送るので自社ページを持たない。
+  // 内容を載せる場所が他に無い記事だけ、受け皿として個別ページを用意する。
+  if (item.source) {
+    if (detailPage) issues.add(`${item.slug}: article page is unused because news-data.json has a source URL`);
+  } else if (!detailPage) {
     issues.add(`news-data.json: missing article page for ${item.slug}`);
-    continue;
   }
-  const matchingArticleDate = [...detailPage.matchAll(/<time\b[^>]*datetime="([^"]+)"[^>]*>([\s\S]*?)<\/time>/gi)]
-    .some((match) => match[1] === item.date && textContent(match[2]) === item.display);
-  if (!matchingArticleDate) {
-    issues.add(`${item.slug}: article date differs from news-data.json`);
+  if (detailPage) {
+    const matchingArticleDate = [...detailPage.matchAll(/<time\b[^>]*datetime="([^"]+)"[^>]*>([\s\S]*?)<\/time>/gi)]
+      .some((match) => match[1] === item.date && textContent(match[2]) === item.display);
+    if (!matchingArticleDate) {
+      issues.add(`${item.slug}: article date differs from news-data.json`);
+    }
+    const articleTitle = detailPage.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
+    if (!articleTitle || textContent(articleTitle) !== item.title) {
+      issues.add(`${item.slug}: article title differs from news-data.json`);
+    }
   }
-  const articleTitle = detailPage.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
-  if (!articleTitle || textContent(articleTitle) !== item.title) {
-    issues.add(`${item.slug}: article title differs from news-data.json`);
-  }
-  if (item.source && !detailPage.includes(`href="${item.source}"`)) issues.add(`${item.slug}: source URL differs from news-data.json`);
   const japaneseNewsHref = item.source || `/news/${item.slug}/`;
   const japaneseStaticEntry = `<article class="is-static"><time datetime="${item.date}">${item.display}</time>`;
   if (item.listingLink === false) {
