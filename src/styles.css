@@ -10,6 +10,9 @@
   --sky: #e2f1f8;
   --blue: #3f9fc5;
   --coral: #ef786e;
+  /* フォーカス枠用。--coral は明るい背景でコントラスト比が 3.0 に届かず、
+     キーボード操作時に現在位置を見失うため、色相と彩度はそのままに明度だけ落とした。 */
+  --focus: #e83f30;
   --yellow: #f2c654;
   --line: rgba(23, 51, 47, 0.16);
   --radius-lg: 30px;
@@ -35,7 +38,7 @@ body.nav-open { overflow: hidden; }
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; text-decoration: none; }
 button { color: inherit; font: inherit; }
-a:focus-visible, button:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 h1, h2, h3, p { margin-top: 0; }
 h1, h2, h3 { overflow-wrap: anywhere; text-wrap: balance; word-break: normal; }
 p, li, dd, address { overflow-wrap: anywhere; text-wrap: pretty; word-break: normal; }
@@ -261,7 +264,7 @@ section { scroll-margin-top: 80px; }
 .message-copy .section-kicker { color: var(--mint); border-color: rgba(255,255,255,.2); }
 .message-copy h2 { margin: 18px 0 20px; font-size: clamp(29px, 2.7vw, 39px); line-height: 1.38; }
 .message-copy h2 span { display: block; }
-.message-copy > p:not(.section-kicker) { margin-bottom: 10px; color: #cbd9d6; font-size: 14.2px; line-height: 1.7; }
+.message-copy > p:not(.section-kicker) { margin-bottom: 10px; color: #cbd9d6; font-size: 14px; line-height: 1.7; }
 .message-copy .message-highlight {
   color: #fff;
   font-weight: 700;
@@ -606,7 +609,7 @@ a.policy-switch:hover { color: var(--green); }
   .site-header { grid-template-columns: 160px 1fr auto auto; }
   .desktop-nav { gap: 18px; }
   .desktop-nav a strong { font-size: 11px; }
-  .desktop-nav a small { font-size: 7px; }
+  .desktop-nav a small { font-size: 9px; }
   .hero { grid-template-columns: 1fr .85fr; min-height: 780px; padding-inline: 40px; }
   .hero-visual { height: 520px; }
   .visual-center { width: 184px; }
@@ -950,7 +953,7 @@ a.policy-switch:hover { color: var(--green); }
   .footer-contact-item { min-height: 76px; padding: 11px 14px; }
   .footer-contact-item > i { width: 38px; height: 38px; }
   .footer-contact-item > strong { font-size: 17px; }
-  .footer-contact-item + .footer-contact-item > strong { font-size: 10.5px; }
+  .footer-contact-item + .footer-contact-item > strong { font-size: 11px; }
   .footer-main { gap: 18px; padding: 22px 0 16px; }
   .footer-brand { display: none; }
   .footer-statement { display: none; }
@@ -1206,13 +1209,13 @@ a.policy-switch:hover { color: var(--green); }
   .footer-main { gap: 0; padding: 18px 0 10px; }
   .footer-navigation { gap: 8px 18px; }
   .footer-column > p { margin-bottom: 2px; padding-bottom: 5px; }
-  .footer-column > a { min-height: 44px; padding-block: 0; font-size: 12.5px; }
+  .footer-column > a { min-height: 44px; padding-block: 0; font-size: 12px; }
   .site-footer .footer-column > a.is-current { color: #9bd8c6; }
 
   .footer-meta { gap: 5px; padding: 7px 0 calc(12px + env(safe-area-inset-bottom, 0px)); line-height: 1.5; }
-  .footer-meta > p { font-size: 10.5px; }
+  .footer-meta > p { font-size: 11px; }
   .footer-meta nav { flex-wrap: wrap; gap: 8px 16px; }
-  .footer-policy-disabled small { font-size: 8.5px; }
+  .footer-policy-disabled small { font-size: 9px; }
 }
 
 /* Responsive editorial rhythm: preserve phrases and readable line lengths. */
