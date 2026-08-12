@@ -425,6 +425,8 @@ section { scroll-margin-top: 80px; }
 .company-news-philosophy { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 22px; align-items: baseline; margin-top: 35px; padding: 21px 0 0 18px; border-top: 1px solid rgba(23, 51, 47, .12); border-left: 3px solid var(--green); }
 .company-news-philosophy p { margin: 0; color: var(--green); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
 .company-news-philosophy strong { font-family: "Noto Sans JP", sans-serif; font-size: 18px; font-weight: 600; line-height: 1.6; letter-spacing: -.02em; }
+/* 英語のラベルは「OUR PHILOSOPHY」と長く、日本語向けの86pxでは2行になる。 */
+.english-site .company-news-philosophy { grid-template-columns: 118px minmax(0, 1fr); }
 
 @media (max-width: 820px) {
   .company-news-hero { padding-bottom: 58px; }
